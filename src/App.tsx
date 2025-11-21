@@ -54,6 +54,8 @@ function App() {
   
   // UI state
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
+  const [searchProgress, setSearchProgress] = useState({ current: 0, total: 0 });
   const [error, setError] = useState('');
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [exportText, setExportText] = useState('');
@@ -148,6 +150,7 @@ function App() {
   // Step 2: Generate shotlist with Gemini
   const handleGenerateShotlist = async () => {
     setIsLoading(true);
+    setLoadingMessage('🤖 Analyzing script with AI...');
     setError('');
     
     try {
@@ -169,6 +172,8 @@ ${script}`;
       const response = await result.response;
       let text = response.text().trim();
       
+      setLoadingMessage('📝 Processing AI response...');
+      
       // Clean up response - remove markdown code blocks if present
       text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       
@@ -178,6 +183,8 @@ ${script}`;
         throw new Error('No people found in script');
       }
       
+      setLoadingMessage(`✅ Found ${people.length} ${people.length === 1 ? 'person' : 'people'} in script!`);
+      
       setShotlist(people);
       setCurrentStep(3);
     } catch (err) {
@@ -185,7 +192,10 @@ ${script}`;
       setError(errorMessage);
       console.error('Shotlist generation error:', err);
     } finally {
-      setIsLoading(false);
+      setTimeout(() => {
+        setIsLoading(false);
+        setLoadingMessage('');
+      }, 1500);
     }
   };
 
@@ -198,14 +208,22 @@ ${script}`;
 
     setIsLoading(true);
     setError('');
+    setSearchProgress({ current: 0, total: shotlist.length });
     
     try {
       const results: PersonGettyResults[] = [];
       
-      for (const person of shotlist) {
+      for (let i = 0; i < shotlist.length; i++) {
+        const person = shotlist[i];
+        setSearchProgress({ current: i + 1, total: shotlist.length });
+        setLoadingMessage(`🔍 Searching Getty for ${person.name}... (${i + 1}/${shotlist.length})`);
+        
         // Use only the person's name for Getty search (not the full search term)
         const videos = await searchGettyVideos(person.name);
+        setLoadingMessage(`📹 Found ${videos.length} videos for ${person.name}...`);
+        
         const photos = await searchGettyPhotos(person.name);
+        setLoadingMessage(`📷 Found ${photos.length} photos for ${person.name}...`);
         
         results.push({
           person,
@@ -217,6 +235,7 @@ ${script}`;
         await delay(1000);
       }
       
+      setLoadingMessage(`✅ Search complete! Found media for ${shotlist.length} ${shotlist.length === 1 ? 'person' : 'people'}`);
       setGettyResults(results);
       setCurrentStep(4);
     } catch (err) {
@@ -224,7 +243,11 @@ ${script}`;
       setError(errorMessage);
       console.error('Getty search error:', err);
     } finally {
-      setIsLoading(false);
+      setTimeout(() => {
+        setIsLoading(false);
+        setLoadingMessage('');
+        setSearchProgress({ current: 0, total: 0 });
+      }, 1500);
     }
   };
 
@@ -681,13 +704,20 @@ ${script}`;
           <div className="step-container">
             <h2>Step 2: Generate Shotlist</h2>
             {shotlist.length === 0 ? (
-              <button
-                onClick={handleGenerateShotlist}
-                className="submit-button"
-                disabled={isLoading}
-              >
-                {isLoading ? 'Generating...' : 'Generate Shotlist'}
-              </button>
+              <>
+                <button
+                  onClick={handleGenerateShotlist}
+                  className="submit-button"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Generating...' : 'Generate Shotlist'}
+                </button>
+                {isLoading && loadingMessage && (
+                  <div className="loading-message">
+                    {loadingMessage}
+                  </div>
+                )}
+              </>
             ) : (
               <div className="shotlist-container">
                 <h3>People in Script:</h3>
@@ -802,6 +832,24 @@ ${script}`;
                 >
                   {isLoading ? 'Searching...' : 'Search Getty Images'}
                 </button>
+                {isLoading && loadingMessage && (
+                  <div className="loading-container">
+                    <div className="loading-message">
+                      {loadingMessage}
+                    </div>
+                    {searchProgress.total > 0 && (
+                      <div className="progress-bar-container">
+                        <div 
+                          className="progress-bar"
+                          style={{ width: `${(searchProgress.current / searchProgress.total) * 100}%` }}
+                        />
+                        <div className="progress-text">
+                          {searchProgress.current} of {searchProgress.total} people searched
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="getty-results-container">

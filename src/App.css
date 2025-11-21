@@ -685,3 +685,79 @@ h4 {
     width: 100%;
   }
 }
+
+/* Loading States */
+.loading-container {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: rgba(97, 218, 251, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(97, 218, 251, 0.2);
+}
+
+.loading-message {
+  margin-top: 15px;
+  padding: 15px 20px;
+  background: linear-gradient(90deg, rgba(97, 218, 251, 0.1) 0%, rgba(97, 218, 251, 0.2) 50%, rgba(97, 218, 251, 0.1) 100%);
+  background-size: 200% auto;
+  animation: shimmer 2s linear infinite;
+  border-radius: 8px;
+  color: #61dafb;
+  font-size: 1.1em;
+  font-weight: 500;
+  text-align: center;
+  border: 1px solid rgba(97, 218, 251, 0.3);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+/* Progress Bar */
+.progress-bar-container {
+  margin-top: 15px;
+  width: 100%;
+  background-color: rgba(40, 44, 52, 0.8);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  height: 40px;
+  border: 2px solid rgba(97, 218, 251, 0.3);
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #61dafb 0%, #4fa8d1 50%, #61dafb 100%);
+  background-size: 200% auto;
+  animation: progressShimmer 1.5s linear infinite;
+  transition: width 0.5s ease-out;
+  border-radius: 8px;
+  position: relative;
+}
+
+@keyframes progressShimmer {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  z-index: 1;
+  pointer-events: none;
+}
