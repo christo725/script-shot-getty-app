@@ -250,7 +250,7 @@ ${script}`;
       params.append('collection_codes', collectionCodes);
     }
 
-    const response = await fetch(`/api/getty/videos?${params.toString()}`, {
+    const response = await fetch(`/api/getty-videos?${params.toString()}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -305,7 +305,7 @@ ${script}`;
       params.append('collection_codes', collectionCodes);
     }
 
-    const response = await fetch(`/api/getty/photos?${params.toString()}`, {
+    const response = await fetch(`/api/getty-photos?${params.toString()}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
